@@ -12,3 +12,5 @@ CREATE DATABASE infodb CHARACTER SET utf8;
 GRANT ALL PRIVILEGES ON infodb.* TO 'infouser'@'%' WITH GRANT OPTION;
 ```
 и команду `python manage.py syncdb` в консоли. При этом Django предложит создать суперпользователя(admin), нужно согласиться.
+
+Задачи распределяются через [To-Dos](To-Dos.md). Если есть актуальная задача, следует указать ее там. Там можно видеть план и примерный ход работ. По поводу синтаксиса следует смотреть [сюда.](https://guides.github.com/features/mastering-markdown/)
