@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		{% load staticfiles %}
+		<meta charset="UTF-8">
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta name="viewport" content="width=device-width, initial-scale=1"> 
+		<link rel="shortcut icon" href="{% static "assets/ico/favicon.ico"%}" >
+
+		<title>{% block title %}TechSearch{% endblock %}</title>
+
+		<!-- Bootstrap core CSS -->
+		<link rel="stylesheet" href="{% static "css/bootstrap.css"%}">
+		<!-- Bootstrap theme -->
+		<link rel="stylesheet" href="{% static "css/bootstrap-theme.css"%}">
+		<!-- Custom styles -->
+		<link rel="stylesheet" href="{% static "theme.css" %}">
+	</head>
+
+	<body>
+		<div id="content">
+			{% block content %}{% endblock %}
+		</div>		
+
+		<div class="footer">
+			<div class="contaier-fluid text-muted">
+				<div class="col-md-2 col-md-offset-4">
+					<a href="#">About TechSearch</a>
+				</div>
+				<div class="col-md-2"><a href='#'>
+					Report a problem
+					</a>
+				</div>
+			</div>
+		</div>
+
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.js"></script>
+		<script src="{% static "js/bootstrap.js" %}"></script>
+	</body>
+</html>
