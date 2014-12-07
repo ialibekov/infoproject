@@ -2,13 +2,55 @@
 
 from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib import messages
 
 from app.models import Document
+from app.forms import SearchForm
+from search import Search
 
 
 def index(request):
-    # return HttpResponse("Hello!")
-    return render(request, 'app/index.html')
+    if request.method == 'POST':
+        form = SearchForm(request.POST)
+        if form.is_valid():
+            query = form.cleaned_data['query']
+            try:
+                search = Search()
+                search.import_index()
+                """
+                i = 0
+                print len(search.index)
+                for k,v in search.index.iteritems():
+                    if i > 20:
+                        break
+                    print k, v
+                    i += 1
+                """
+                result = search.go(query)
+                for url, title in result:
+                    print url, title
+                    print "\n"
+            except ValueError, error:
+                messages.error(request, error.message)
+                return HttpResponseRedirect('')
+        else:
+            messages.error(request, form.errors)
+    else:
+        form = SearchForm()
+
+    return render(request, 'app/index.html', {
+        'form': form,
+    })
+
+
+def build(request):
+    search = Search()
+    search.build()
+    search.export_index()
+    return HttpResponseRedirect('/')
+
+
+
 
 
 headers = {'User-Agent': 'Index Creating Bot POC'}
@@ -24,7 +66,7 @@ def walk_habr(request):
         stories = list()
         # max_id = 243319
         max_id = 241500
-        for i in range(240500, max_id):
+        for i in range(241500, max_id):
             print i, 'out of', max_id
             time.sleep(1)
             url = base_url + str(i)
@@ -40,5 +82,8 @@ def walk_habr(request):
             title = unicode(title.renderContents(), 'utf-8')[:-12]  # deleting / Habrahabr in the end of title
             text = soup.find("div", {"class": "content html_format"})
             text = unicode(text.get_text())
-            Document.objects.create(url=url, title=title, text=text)
+            try:
+                Document.objects.create(url=url, title=title, text=text)
+            except Warning:
+                continue
     return HttpResponseRedirect('/')
