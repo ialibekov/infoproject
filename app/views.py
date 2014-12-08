@@ -27,9 +27,15 @@ def index(request):
                     i += 1
                 """
                 result = search.go(query)
+                return render(request, 'app/result.html', {
+                    'form': form,
+                    'result': result,
+                })
+                """
                 for url, title in result:
                     print url, title
                     print "\n"
+                """
             except ValueError, error:
                 messages.error(request, error.message)
                 return HttpResponseRedirect('')
