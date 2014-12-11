@@ -1,5 +1,6 @@
 infoproject
 ===========
+[![Gitter](https://badges.gitter.im/Join Chat.svg)](https://gitter.im/ialibekov/infoproject?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
 Установка и настройка:
 
