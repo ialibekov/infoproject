@@ -1,10 +1,23 @@
-from django.db import models
+# from django.db import models
+from mongoengine import Document, fields
 
 
-class Document(models.Model):
-    url = models.URLField(max_length=255)
-    title = models.CharField(max_length=1000)
-    text = models.TextField()
+class TextDocument(Document):
+    url = fields.URLField(required=True)
+    title = fields.StringField(required=True)
+    text = fields.StringField(required=True)
 
     def __unicode__(self):
         return u"{0}".format(self.title)
+
+
+class PostingList(Document):
+    term = fields.StringField(required=True)
+    documents = fields.ListField(field=fields.ObjectIdField(), required=True)
+
+    def __unicode__(self):
+        return u"{0}".format(self.term)
+
+
+class TfIdf(Document):
+    pass

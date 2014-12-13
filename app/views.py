@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 
-from app.models import Document
+from app.models import TextDocument, PostingList
 from app.forms import SearchForm
 from search import Search
 
@@ -52,9 +52,8 @@ def index(request):
 def build(request):
     search = Search()
     search.build()
-    search.export_index()
+    # search.export_index()
     return HttpResponseRedirect('/')
-
 
 
 
@@ -71,8 +70,8 @@ def walk_habr(request):
     with open('habr.json', 'w') as f:
         stories = list()
         # max_id = 243319
-        max_id = 241500
-        for i in range(241500, max_id):
+        max_id = 240050
+        for i in range(240000, max_id):
             print i, 'out of', max_id
             time.sleep(1)
             url = base_url + str(i)
@@ -89,7 +88,7 @@ def walk_habr(request):
             text = soup.find("div", {"class": "content html_format"})
             text = unicode(text.get_text())
             try:
-                Document.objects.create(url=url, title=title, text=text)
+                TextDocument(url=url, title=title, text=text).save()
             except Warning:
                 continue
     return HttpResponseRedirect('/')

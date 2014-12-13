@@ -38,7 +38,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app',
-    'south',
 )
 
 MIDDLEWARE_CLASSES = (
@@ -58,6 +57,23 @@ WSGI_APPLICATION = 'project.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/1.6/ref/settings/#databases
 
+from mongoengine import connect
+
+connect('infodb')
+
+DATABASES = {
+    'default': {
+        'ENGINE': '',
+    },
+}
+
+AUTHENTICATION_BACKENDS = (
+    'mongoengine.django.auth.MongoEngineBackend',
+)
+
+SESSION_ENGINE = 'mongoengine.django.sessions'
+
+"""
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -68,6 +84,7 @@ DATABASES = {
         'PORT': '',
     }
 }
+"""
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
