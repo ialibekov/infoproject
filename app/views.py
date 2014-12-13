@@ -16,7 +16,7 @@ def index(request):
             query = form.cleaned_data['query']
             try:
                 search = Search()
-                search.import_index()
+                # search.import_index()
                 """
                 i = 0
                 print len(search.index)
