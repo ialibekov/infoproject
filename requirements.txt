@@ -1,3 +1,4 @@
+BeautifulSoup==3.2.1
 Django==1.6
 MySQL-python==1.2.5
 Pillow==2.6.1
@@ -10,6 +11,7 @@ django-debug-toolbar==1.2.2
 goose-extractor==1.0.22
 jieba==0.35
 lxml==3.4.0
+mongoengine==0.8.7
 newspaper==0.0.8
 nltk==3.0.0
 numpy==1.9.0
