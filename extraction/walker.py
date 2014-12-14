@@ -3,11 +3,16 @@
 import requests
 import json
 import time
+import sys
 
 from requests import get
 from bs4 import BeautifulSoup
 
 headers = {'User-Agent': 'Index Creating Bot POC'}
+YCOMB_FROM = 800000
+YCOMB_TO   = 900000
+HABR_FROM  = 230000
+HABR_TO    = 231000
 
 
 def walk_hackernews():
@@ -19,7 +24,7 @@ def walk_hackernews():
         stories = list()
         # top_stories = json.loads(get(base_url + 'topstories.json').text)
         # max_id = int(get(base_url + 'maxitem.json', headers=headers).text)
-        max_id = 8614319
+        max_id = YCOMB_TO
         max_id = max_id - 10000
         for item in range(max_id - 1000, max_id + 1):
             print item, 'out of', max_id
@@ -89,24 +94,34 @@ def walk_habr():
     with open('habr.json', 'w') as f:
         stories = list()
         # max_id = 243319
-        max_id = 2400010
-        for i in range(240000, max_id + 1):
+        max_id = HABR_TO
+        for i in range(HABR_FROM, max_id + 1):
             print i, 'out of', max_id
             time.sleep(1)
-            url = base_url + str(i)
-            r = get(url, headers=headers)
-            if r.status_code == 404:
-                print 'Get 404', url
+            try:
+                url = base_url + str(i)
+                r = get(url, headers=headers)
+                if r.status_code == 404:
+                    print 'Get 404', url
+                    continue
+                if u'Доступ к публикации закрыт' in r.text:
+                    print 'Article was closed', url
+                    continue
+                soup = BeautifulSoup(r.text)
+                title = soup.find('title')
+                title = unicode(title.renderContents(), 'utf-8')
+                text = soup.find("div", {"class": "content html_format"})
+                text = unicode(text.get_text())
+                # div.post_show div span.score
+                score = soup.select("div.post div.voting span.score")[0].get_text()
+                score = score.replace(u"\u2013", "-")
+                score = int(score)
+                rating = soup.select("div.post_show")
+                stories.append({'url': url, 'title': title, 'text': text,
+                                'score': score})
+            except:
+                print "Some errors occured... ", sys.exc_info()[0] 
                 continue
-            if u'Доступ к публикации закрыт' in r.text:
-                print 'Article was closed', url
-                continue
-            soup = BeautifulSoup(r.text)
-            title = soup.find('title')
-            title = unicode(title.renderContents(), 'utf-8')
-            text = soup.find("div", {"class": "content html_format"})
-            text = unicode(text.get_text())
-            stories.append({'url': url, 'title': title, 'text': text})
         json.dump(stories, f)
 
 

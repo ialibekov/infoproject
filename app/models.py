@@ -6,6 +6,7 @@ class TextDocument(Document):
     url = fields.URLField(required=True)
     title = fields.StringField(required=True)
     text = fields.StringField(required=True)
+    score = fields.IntField(required=True)
 
     def __unicode__(self):
         return u"{0}".format(self.title)
