@@ -87,8 +87,12 @@ def walk_habr(request):
             title = unicode(title.renderContents(), 'utf-8')[:-12]  # deleting / Habrahabr in the end of title
             text = soup.find("div", {"class": "content html_format"})
             text = unicode(text.get_text())
+            score = soup.select("div.post div.voting span.score")[0].get_text()
+            score = score.replace(u"\u2013", "-")
+            score = int(score)
+            rating = soup.select("div.post_show")
             try:
-                TextDocument(url=url, title=title, text=text).save()
+                TextDocument(url=url, title=title, text=text, score=score).save()
             except Warning:
                 continue
     return HttpResponseRedirect('/')
