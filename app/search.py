@@ -5,21 +5,23 @@ from app.models import TextDocument, PostingList, DocumentRank
 from pymystem3 import Mystem
 import re
 from math import log10
+import mongoengine
 
-PUNCTUATION = re.compile(u' .,?!:;\(\)"\'-', re.UNICODE)
+PUNCTUATION = re.compile(u' .,?!:;|/\(\)]\[\\"\'-', re.UNICODE)
 
 
 class Search(object):
 
     def __init__(self):
         self.stemmer = Mystem()
-        # self.index = dict()
-        # self.terms = list()
         self.terms = dict()
         self.num_of_documents = 0.0
 
     def build(self):
+        PostingList.drop_collection()
+        DocumentRank.drop_collection()
         for doc_id, document in TextDocument.objects.values_list('id', 'text'):
+            print doc_id
             self.num_of_documents += 1
             for word in self.stemmer.lemmatize(document):
                 term = PUNCTUATION.sub(" ", word).strip().lower()
@@ -28,7 +30,7 @@ class Search(object):
 
         for term, documents in self.terms.iteritems():
             idf = log10(self.num_of_documents / len(documents))
-            p = PostingList.objects.create(term=term, documents=list())
+            p = PostingList.objects.create(term=term)
             for document, tf in sorted(documents.items(), key=lambda tup: tup[1], reverse=True):
                 rank = (1 + log10(tf)) * idf
                 p.documents.append(DocumentRank.objects.create(document=document, rank=rank))
@@ -41,10 +43,13 @@ class Search(object):
         for word in self.stemmer.lemmatize(query):
             term = PUNCTUATION.sub(" ", word).strip().lower()
             if term:
-                for doc_id, tf_idf in self.index.get(term, []):
-                    if doc_id in result:
-                        result[doc_id] += tf_idf
-                    else:
-                        result[doc_id] = tf_idf
-        result_doc_id = [doc_id for doc_id, tf_idf in sorted(result.items(), key=lambda tup: tup[1], reverse=True)[:10]]
-        return TextDocument.objects.filter(id__in=result_doc_id).values_list('url', 'title')
+                print term
+                try:
+                    ranked_documents = PostingList.objects.get(term=term).select_related(max_depth=2).documents
+                    for rd in ranked_documents:
+                        doc = rd.document
+                        result[doc] = result.setdefault(doc, 0) + rd.rank
+                except mongoengine.errors.DoesNotExist:
+                    continue
+        print sorted(result.items(), key=lambda tup: tup[1], reverse=True)
+        return [(doc.url, doc.title)for doc, rank in sorted(result.items(), key=lambda tup: tup[1], reverse=True)[:10]]

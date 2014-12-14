@@ -14,15 +14,15 @@ class TextDocument(Document):
 
 class DocumentRank(Document):
     document = fields.ReferenceField(TextDocument, required=True)
-    tf_idf = fields.FloatField(required=True)
+    rank = fields.FloatField(required=True)
 
     def __unicode__(self):
-        return u"{0} : {1}".format(self.document, self.tf_idf)
+        return u"{0} : {1}".format(self.document, self.rank)
 
 
 class PostingList(Document):
     term = fields.StringField(required=True)
-    documents = fields.ListField(field=fields.ReferenceField(DocumentRank), required=True, default=list())
+    documents = fields.ListField(field=fields.ReferenceField(DocumentRank), default=list())
 
     def __unicode__(self):
         return u"{0}".format(self.term)

@@ -16,26 +16,12 @@ def index(request):
             query = form.cleaned_data['query']
             try:
                 search = Search()
-                # search.import_index()
-                """
-                i = 0
-                print len(search.index)
-                for k,v in search.index.iteritems():
-                    if i > 20:
-                        break
-                    print k, v
-                    i += 1
-                """
                 result = search.go(query)
                 return render(request, 'app/result.html', {
                     'form': form,
                     'result': result,
                 })
-                """
-                for url, title in result:
-                    print url, title
-                    print "\n"
-                """
+
             except ValueError, error:
                 messages.error(request, error.message)
                 return HttpResponseRedirect('')
@@ -70,8 +56,8 @@ def walk_habr(request):
     with open('habr.json', 'w') as f:
         stories = list()
         # max_id = 243319
-        max_id = 240050
-        for i in range(240000, max_id):
+        max_id = 241500
+        for i in range(240546, max_id):
             print i, 'out of', max_id
             time.sleep(1)
             url = base_url + str(i)
