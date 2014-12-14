@@ -6,9 +6,11 @@ import json
 from app.models import TextDocument
 from mongoengine import connect
 
+MONGO_ID = 1
 connect('infodb')
 
 def putfile(path):
+	global MONGO_ID
 	f = open(path, 'r')
 	serial = json.load(f)
 	for d in serial:
@@ -16,7 +18,8 @@ def putfile(path):
 		text = d['text']
 		score = d['score']
 		title = d['title']
-		TextDocument(url=url, title=title, text=text, score=score).save()
+		TextDocument(id=MONGO_ID, url=url, title=title, text=text, score=score).save()
+		MONGO_ID += 1
 		print title
 	f.close
 

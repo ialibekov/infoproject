@@ -78,7 +78,7 @@ def walk_habr(request):
             score = int(score)
             rating = soup.select("div.post_show")
             try:
-                TextDocument(url=url, title=title, text=text, score=score).save()
+                TextDocument(id=i, url=url, title=title, text=text, score=score).save()
             except Warning:
                 continue
     return HttpResponseRedirect('/')

@@ -3,6 +3,7 @@ from mongoengine import Document, fields
 
 
 class TextDocument(Document):
+    id = fields.IntField(primary_key=True)
     url = fields.URLField(required=True)
     title = fields.StringField(required=True)
     text = fields.StringField(required=True)
