@@ -79,7 +79,7 @@ class Search(object):
         for w in sorted_weights:
             if w[1] > 0:
                 snippet += text[w[0]]
-                snippet += "..."
+                snippet += " ... "
 
         # if we don't return 
         if snippet == "":
