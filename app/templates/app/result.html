@@ -22,9 +22,10 @@
   <button type="submit" class="btn btn-success">Search</button>
 </form>
 <div>
-  {% for url, title in result %}
+  {% for url, title, snippet in result %}
   <div>
     <h3><a href="{{ url }}">{{ title }}</a></h3>
+    <p>{{snippet}}</p>
   </div>
   {% endfor %}
 </div>

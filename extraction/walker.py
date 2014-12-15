@@ -4,6 +4,7 @@ import requests
 import json
 import time
 import sys
+import re
 
 from requests import get
 from bs4 import BeautifulSoup
@@ -12,7 +13,7 @@ headers = {'User-Agent': 'Index Creating Bot POC'}
 YCOMB_FROM = 800000
 YCOMB_TO   = 900000
 HABR_FROM  = 230000
-HABR_TO    = 231000
+HABR_TO    = 230120
 
 
 def walk_hackernews():
@@ -112,6 +113,7 @@ def walk_habr():
                 title = unicode(title.renderContents(), 'utf-8')
                 text = soup.find("div", {"class": "content html_format"})
                 text = unicode(text.get_text())
+                text = text_prepare(text)
                 # div.post_show div span.score
                 score = soup.select("div.post div.voting span.score")[0].get_text()
                 score = score.replace(u"\u2013", "-")
@@ -124,6 +126,9 @@ def walk_habr():
                 continue
         json.dump(stories, f)
 
+def text_prepare(text):
+    text = re.sub(r'[\t\n]', r' ', text)
+    return re.sub(r' +', ' ', text)
 
 if __name__ == '__main__':
     # walk_hackernews()
