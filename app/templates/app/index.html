@@ -1,24 +1,43 @@
 {% extends 'app/base.html' %}
 
 {% block content %}
-<form id="searchForm" role="form" action="" method="post">
-  {% csrf_token %}
-  {% for field in form %}
-  <div class="form-group">
-    {% if field.errors %}
-    <div class="alert alert-danger">
-      {{ field.errors }}
-    </div>
-    {% endif %}
-    {{ field.label_tag }}
-    {{ field }}
-    {% if field.help_text %}
-    <p class="text-success">
-      {{ field.help_text }}
-    </p>
-    {% endif %}
+{% load staticfiles %}
+
+<div class="jumbotron container">
+
+  <div class="row">
+    <img src='{% static "logo.png" %}' alt="Logo" class="center-block img-responsive">
   </div>
-  {% endfor %}
-  <button type="submit" class="btn btn-success">Search</button>
-</form>
+  <form id="searchForm" role="form" action="" method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <div class="form-group">
+        {% if field.errors %}
+          <div class="row">
+            <div class="alert alert-danger col-md-offset-1 col-md-10">
+              {{ field.errors }}
+            </div>
+          </div>
+        {% endif %}
+          
+          <div class="row ">
+            <div class="col-md-offset-1 col-md-10">{{ field }}</div>
+          </div>
+          {% if field.help_text %}
+          <div class="row">
+            <p class="text-success">
+              {{ field.help_text }}
+            </p>
+          </div>
+
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    <p>
+      <button type="submit" class="btn btn-success">Search</button>
+    </p>
+  </form>
+</div>
+
 {% endblock %}
