@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from app.models import TextDocument, PostingList, DocumentRank
+from app.models import TextDocument, TextPostingList, TitlePostingList, TextDocumentRank, TitleDocumentRank
 from pymystem3 import Mystem
 import re
 from math import log10
@@ -16,29 +16,47 @@ class Search(object):
 
     def __init__(self):
         self.stemmer = Mystem()
-        self.terms = dict()
+        self.terms_in_text = dict()
+        self.terms_in_title = dict()
         self.num_of_documents = 0.0
 
     def build(self):
-        PostingList.drop_collection()
-        DocumentRank.drop_collection()
-        for doc_id, document in TextDocument.objects.values_list('id', 'text'):
+        TextPostingList.drop_collection()
+        TitlePostingList.drop_collection()
+        TextDocumentRank.drop_collection()
+        TitleDocumentRank.drop_collection()
+        for doc_id, text, title in TextDocument.objects.values_list('id', 'text', 'title'):
             print doc_id
             self.num_of_documents += 1
-            for word in self.stemmer.lemmatize(document):
+            for word in self.stemmer.lemmatize(text):
                 term = PUNCTUATION.sub(" ", word).strip().lower()
                 if term:
-                    self.terms[term][doc_id] = self.terms.setdefault(term, dict()).setdefault(doc_id, 0) + 1
+                    self.terms_in_text[term][doc_id] = self.terms_in_text.setdefault(term, dict()).setdefault(doc_id, 0) + 1
 
-        for term, documents in self.terms.iteritems():
+            for word in self.stemmer.lemmatize(title):
+                term = PUNCTUATION.sub(" ", word).strip().lower()
+                if term:
+                    self.terms_in_title[term][doc_id] = self.terms_in_title.setdefault(term, dict()).setdefault(doc_id, 0) + 1
+
+        # building index for texts
+        for term, documents in self.terms_in_text.iteritems():
             idf = log10(self.num_of_documents / len(documents))
-            p = PostingList.objects.create(term=term)
+            p = TextPostingList.objects.create(term=term)
             for document, tf in sorted(documents.items(), key=lambda tup: tup[1], reverse=True):
                 rank = (1 + log10(tf)) * idf
-                p.documents.append(DocumentRank.objects.create(document=document, rank=rank))
+                p.documents.append(TextDocumentRank.objects.create(document=document, rank=rank))
             p.save()
+        del self.terms_in_text
 
-        del self.terms
+        # building index for titles
+        for term, documents in self.terms_in_title.iteritems():
+            idf = log10(self.num_of_documents / len(documents))
+            p = TitlePostingList.objects.create(term=term)
+            for document, tf in sorted(documents.items(), key=lambda tup: tup[1], reverse=True):
+                rank = (1 + log10(tf)) * idf
+                p.documents.append(TitleDocumentRank.objects.create(document=document, rank=rank))
+            p.save()
+        del self.terms_in_title
 
     def lemmatize(self, text):
         for word in self.stemmer.lemmatize(text):
@@ -56,7 +74,7 @@ class Search(object):
     def snippet(self, text, query):
         print "+++++"
         query = [q for q in self.lemmatize(query)][:30]
-        text = PARTSTRING.findall(text);
+        text = PARTSTRING.findall(text)
 
         weights = [(i, self.count_inclusion(query, t), len(t)) for i, t in enumerate(text)]
 
@@ -89,15 +107,24 @@ class Search(object):
 
     def go(self, query):
         result = dict()
+        title_weight = 2
         for word in self.stemmer.lemmatize(query):
             term = PUNCTUATION.sub(" ", word).strip().lower()
             if term:
                 try:
-                    ranked_documents = PostingList.objects.get(term=term).select_related(max_depth=2).documents
+                    ranked_documents = TitlePostingList.objects.get(term=term).select_related(max_depth=2).documents
+                    for rd in ranked_documents:
+                        doc = rd.document
+                        result[doc] = result.setdefault(doc, 0) + rd.rank * title_weight
+                except mongoengine.errors.DoesNotExist:
+                    pass
+                try:
+                    ranked_documents = TextPostingList.objects.get(term=term).select_related(max_depth=2).documents
                     for rd in ranked_documents:
                         doc = rd.document
                         result[doc] = result.setdefault(doc, 0) + rd.rank
                 except mongoengine.errors.DoesNotExist:
                     continue
         sorted_result = sorted(result.items(), key=lambda tup: tup[1], reverse=True)[:100]
-        return [(doc.url, doc.title, self.snippet(doc.text, query)) for doc, rank in sorted_result]
+        # return [(doc.url, doc.title, self.snippet(doc.text, query)) for doc, rank in sorted_result]
+        return [(doc.url, doc.title) for doc, rank in sorted_result]
