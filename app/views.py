@@ -55,9 +55,9 @@ def walk_habr(request):
     base_url = 'http://habrahabr.ru/post/'
     with open('habr.json', 'w') as f:
         stories = list()
-        # max_id = 243319
-        max_id = 241500
-        for i in range(240500, max_id):
+        max_id = 246413
+        # max_id = 241500
+        for i in range(243319, max_id):
             print i, 'out of', max_id
             time.sleep(1)
             url = base_url + str(i)
@@ -75,6 +75,8 @@ def walk_habr(request):
                 text = soup.find("div", {"class": "content html_format"})
                 text = unicode(text.get_text())
                 score = soup.select("div.post div.voting span.score")[0].get_text()
+                if score == u"\u2014":
+                    continue
                 score = score.replace(u"\u2013", "-")
                 score = int(score)
                 rating = soup.select("div.post_show")
