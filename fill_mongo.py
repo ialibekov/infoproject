@@ -17,7 +17,7 @@ def putfile(path):
 		url = d['url']
 		text = d['text']
 		score = d['score']
-		title = d['title']
+		title = unicode(d['title'])
 		TextDocument(id=MONGO_ID, url=url, title=title, text=text, score=score).save()
 		MONGO_ID += 1
 		print title

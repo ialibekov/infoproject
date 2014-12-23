@@ -16,10 +16,12 @@ def index(request):
             query = form.cleaned_data['query']
             try:
                 search = Search()
+                suggest = search.generate_suggest(query)
                 result = search.go(query)
                 return render(request, 'app/result.html', {
                     'form': form,
                     'result': result,
+                    'suggest': suggest
                 })
 
             except ValueError, error:
@@ -40,8 +42,6 @@ def build(request):
     search.build()
     # search.export_index()
     return HttpResponseRedirect('/')
-
-
 
 
 headers = {'User-Agent': 'Index Creating Bot POC'}

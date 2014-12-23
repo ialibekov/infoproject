@@ -3,13 +3,21 @@
 
 from app.models import TextDocument, TextPostingList, TitlePostingList, TextDocumentRank, TitleDocumentRank
 from pymystem3 import Mystem
+from spell.spell import SpellChecker
 import re
 from math import log10
 import mongoengine
+import sys
 
 PUNCTUATION = re.compile(u' .,?!:;|/\(\)]\[\\"\'-', re.UNICODE)
 PARTSTRING = re.compile(u'[^.;\u2013]+', re.UNICODE)
+WORDS = re.compile(u'\w+', re.UNICODE)
 SNIPPET_LENGHT = 300
+
+def enc_check(word):
+    if isinstance(word, unicode):
+        return word
+    return unicode(word, 'utf-8')
 
 
 class Search(object):
@@ -19,6 +27,7 @@ class Search(object):
         self.terms_in_text = dict()
         self.terms_in_title = dict()
         self.num_of_documents = 0.0
+        self.spell_checker = SpellChecker()
 
     def build(self):
         TextPostingList.drop_collection()
@@ -72,7 +81,6 @@ class Search(object):
         return count
 
     def snippet(self, text, query):
-        print "+++++"
         query = [q for q in self.lemmatize(query)][:30]
         text = PARTSTRING.findall(text)
 
@@ -128,3 +136,17 @@ class Search(object):
         sorted_result = sorted(result.items(), key=lambda tup: tup[1], reverse=True)[:100]
         # return [(doc.url, doc.title, self.snippet(doc.text, query)) for doc, rank in sorted_result]
         return [(doc.url, doc.title) for doc, rank in sorted_result]
+
+    def generate_suggest(self, query):
+        text = WORDS.findall(query)
+        try: 
+            if text:
+
+                sug = u' '.join([enc_check(self.spell_checker.spell(i)) for i in text])
+                orig = u' '.join([i for i in text])
+                if sug != orig:
+                    return sug
+        except:
+            print "Some errors occured... ", sys.exc_info()[0] 
+        return None
+
