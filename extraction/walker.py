@@ -126,6 +126,7 @@ def walk_habr():
                 continue
         json.dump(stories, f)
 
+
 def text_prepare(text):
     text = re.sub(r'[\t\n]', r' ', text)
     return re.sub(r' +', ' ', text)
