@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from app.search import Search
 from mongoengine import connect
 

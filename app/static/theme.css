@@ -33,3 +33,25 @@ body {
 	padding-bottom: 20px;
 	width: 20%;
 }
+
+.header-form {
+	padding: 20px;
+	padding-bottom: 40px;
+	background-color: #eeeeee;
+	border-bottom-style: solid;
+	border-bottom-color: #aaaaaa;
+	border-bottom-width: 1px;
+	margin-left: 0px;
+	margin-right: 0px;
+	width: 100%;
+}
+
+.suggest {
+	padding-left: 20px;
+	padding-top: 10px;
+	position: absolute;
+}
+
+.container {
+	margin-right: 0px;
+}

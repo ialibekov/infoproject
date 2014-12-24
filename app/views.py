@@ -19,6 +19,7 @@ def go_search(query, need_suggest=True):
 
 
 def index(request):
+    form = SearchForm()
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
@@ -35,6 +36,7 @@ def index(request):
                 messages.error(request, error.message)
                 return HttpResponseRedirect('')
         else:
+            print "Invalid"
             messages.error(request, form.errors)
     else:
         query = request.GET.get('q', '')
@@ -46,7 +48,7 @@ def index(request):
                 'result': result,
                 'suggest': suggest
                 })
-    form = SearchForm()
+    
     return render(request, 'app/index.html', {
         'form': form,
     })

@@ -18,7 +18,8 @@ def putfile(path):
 		text = d['text']
 		score = d['score']
 		title = unicode(d['title'])
-		TextDocument(id=MONGO_ID, url=url, title=title, text=text, score=score).save()
+		author=d['author']
+		TextDocument(id=MONGO_ID, url=url, title=title, text=text, score=score, author=author).save()
 		MONGO_ID += 1
 		print title
 	f.close
@@ -40,6 +41,7 @@ if __name__ == '__main__':
 		TextDocument.drop_collection()
 		exit()
 	if args.files:
+		TextDocument.drop_collection()
 		for i in args.files:
 			path = 'extraction/' + i
 			putfile(path)
