@@ -49,7 +49,17 @@ class Search(object):
                     self.terms_in_title[term][doc_id] = self.terms_in_title.setdefault(term, dict()).setdefault(doc_id, 0) + 1
 
         # building index for texts
+        print "\nbuilding index for texts"
+        i = 1
+        n = len(self.terms_in_text)
+        print "{0} of {1}".format(i, n)
+
         for term, documents in self.terms_in_text.iteritems():
+
+            if i % 100 == 0:
+                print "{0} of {1}".format(i, n)
+            i += 1
+
             idf = log10(self.num_of_documents / len(documents))
             p = TextPostingList.objects.create(term=term)
             for document, tf in sorted(documents.items(), key=lambda tup: tup[1], reverse=True):
@@ -59,7 +69,17 @@ class Search(object):
         del self.terms_in_text
 
         # building index for titles
+        print "\nbuilding index for titles"
+        i = 1
+        n = len(self.terms_in_title)
+        print "{0} of {1}".format(i, n)
+
         for term, documents in self.terms_in_title.iteritems():
+
+            if i % 100 == 0:
+                print "{0} of {1}".format(i, n)
+            i += 1
+
             idf = log10(self.num_of_documents / len(documents))
             p = TitlePostingList.objects.create(term=term)
             for document, tf in sorted(documents.items(), key=lambda tup: tup[1], reverse=True):
