@@ -6,13 +6,14 @@ from pymystem3 import Mystem
 from spell.spell import SpellChecker
 import re
 from math import log10
+from nltk.tokenize import word_tokenize
 import mongoengine
 import sys
 
 PUNCTUATION = re.compile(u' .,?!:;|/\(\)]\[\\"\'-', re.UNICODE)
 PARTSTRING = re.compile(u'[^.;\u2013]+', re.UNICODE)
 WORDS = re.compile(u'\w+', re.UNICODE)
-SNIPPET_LENGHT = 300
+SNIPPET_LENGHT = 500
 
 def enc_check(word):
     if isinstance(word, unicode):
@@ -80,36 +81,54 @@ class Search(object):
                 count += 1
         return count
 
+    def bold_snippet(self, norm_query, snippet):
+        bold_snippet = snippet
+        for t in word_tokenize(snippet):
+            t = self.lemmatize(t)[0]
+
+
     def snippet(self, text, query):
         query = [q for q in self.lemmatize(query)][:30]
         text = PARTSTRING.findall(text)
 
-        weights = [(i, self.count_inclusion(query, t), len(t)) for i, t in enumerate(text)]
+        #weights = [(i, self.count_inclusion(query, t), len(t)) for i, t in enumerate(text)]
 
-        sorted_weights = sorted(weights, key=lambda tup: tup[1], reverse=True)[:5]
-        print sorted_weights
-        print text[sorted_weights[0][0]]
+        len_snippet = 0
+        snippet = ""
+        for t in text:
+            if self.count_inclusion(query, t) != 0:
+                snippet += t
+                snippet += " ... "
+                len_snippet += len(t)
+                if len_snippet > SNIPPET_LENGHT:
+                    break
+
+        # sorted_weights = sorted(weights, key=lambda tup: tup[1], reverse=True)[:5]
+        # print sorted_weights
+        # print text[sorted_weights[0][0]]
 
         # regular snippeted lengths
-        snippet_len = 0
-        num_sentences = 0
-        for num_sentences, w in enumerate(sorted_weights):
-            snippet_len += w[2]
-            num_sentences += 1
-            if snippet_len > SNIPPET_LENGHT:
-                break
+        # snippet_len = 0
+        # num_sentences = 0
+        # for num_sentences, w in enumerate(sorted_weights):
+        #     snippet_len += w[2]
+        #     num_sentences += 1
+        #     if snippet_len > SNIPPET_LENGHT:
+        #         break
 
-        sorted_weights = sorted_weights[:num_sentences]
-        sorted_weights = sorted(sorted_weights, key=lambda tup: tup[0])
-        snippet = ""
-        for w in sorted_weights:
-            if w[1] > 0:
-                snippet += text[w[0]]
-                snippet += " ... "
+        # sorted_weights = sorted_weights[:num_sentences]
+        # sorted_weights = sorted(sorted_weights, key=lambda tup: tup[0])
+        # snippet = ""
+        # for w in sorted_weights:
+        #     if w[1] > 0:
+        #         snippet += text[w[0]]
+        #         snippet += " ... "
 
         # if we don't return 
         if snippet == "":
             snippet == text[:SNIPPET_LENGHT]
+
+
         
         return snippet
 
@@ -134,14 +153,13 @@ class Search(object):
                 except mongoengine.errors.DoesNotExist:
                     continue
         sorted_result = sorted(result.items(), key=lambda tup: tup[1], reverse=True)[:100]
-        # return [(doc.url, doc.title, self.snippet(doc.text, query)) for doc, rank in sorted_result]
-        return [(doc.url, doc.title) for doc, rank in sorted_result]
+        return [(doc.url, doc.title, self.snippet(doc.text, query)) for doc, rank in sorted_result]
+        #return [(doc.url, doc.title) for doc, rank in sorted_result]
 
     def generate_suggest(self, query):
         text = WORDS.findall(query)
         try: 
             if text:
-
                 sug = u' '.join([enc_check(self.spell_checker.spell(i)) for i in text])
                 orig = u' '.join([i for i in text])
                 if sug != orig:
