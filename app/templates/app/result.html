@@ -30,15 +30,15 @@
 
   <div class="row col-md-10 suggest">
     {% if suggest %}
-     <p>Возможно, вы имели в виду <a href="{% url 'index' %}?q={{suggest}}">{{suggest}}</a></p>
+     <p>Возможно, вы имели в виду <i><b><a href="{% url 'index' %}?q={{suggest}}">{{suggest}}</a></b></i></p>
     {% endif %}
   </div>
 </div>
 
 
-<div>
+<div class="container">
   {% for url, title, snippet in result %}
-  <div>
+  <div class="row">
     <h3><a href="{{ url }}">{{ title }}</a></h3>
     <p>{{snippet}}</p>
   </div>
