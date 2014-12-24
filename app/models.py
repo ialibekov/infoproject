@@ -8,6 +8,7 @@ class TextDocument(Document):
     title = fields.StringField(required=True)
     text = fields.StringField(required=True)
     score = fields.IntField(required=True)
+    author = fields.StringField(required=False)
 
     def __unicode__(self):
         return u"{0}".format(self.title)

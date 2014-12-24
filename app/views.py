@@ -8,16 +8,24 @@ from app.models import TextDocument, TextPostingList, TitlePostingList
 from app.forms import SearchForm
 from search import Search
 
+def go_search(query, need_suggest=True):
+    search = Search()
+    if (need_suggest):
+        suggest = search.generate_suggest(query)
+    else:
+        suggest = ""
+    result = search.go(query)
+    return result, suggest
+
 
 def index(request):
+    form = SearchForm()
     if request.method == 'POST':
         form = SearchForm(request.POST)
         if form.is_valid():
             query = form.cleaned_data['query']
             try:
-                search = Search()
-                suggest = search.generate_suggest(query)
-                result = search.go(query)
+                result, suggest = go_search(query)
                 return render(request, 'app/result.html', {
                     'form': form,
                     'result': result,
@@ -28,10 +36,19 @@ def index(request):
                 messages.error(request, error.message)
                 return HttpResponseRedirect('')
         else:
+            print "Invalid"
             messages.error(request, form.errors)
     else:
-        form = SearchForm()
-
+        query = request.GET.get('q', '')
+        if query:
+            form = SearchForm({'query': query})
+            result, suggest = go_search(query)
+            return render(request, 'app/result.html', {
+                'form': form,
+                'result': result,
+                'suggest': suggest
+                })
+    
     return render(request, 'app/index.html', {
         'form': form,
     })

@@ -12,8 +12,8 @@ from bs4 import BeautifulSoup
 headers = {'User-Agent': 'Index Creating Bot POC'}
 YCOMB_FROM = 800000
 YCOMB_TO   = 900000
-HABR_FROM  = 230000
-HABR_TO    = 230120
+HABR_FROM  = 100000
+HABR_TO    = 100050
 
 
 def walk_hackernews():
@@ -110,19 +110,24 @@ def walk_habr():
                     continue
                 soup = BeautifulSoup(r.text)
                 title = soup.find('title')
-                title = unicode(title.renderContents(), 'utf-8')
+                title = unicode(title.renderContents(), 'utf-8').split('/')[0]
+                print title
                 text = soup.find("div", {"class": "content html_format"})
                 text = unicode(text.get_text())
                 text = text_prepare(text)
                 # div.post_show div span.score
                 score = soup.select("div.post div.voting span.score")[0].get_text()
                 score = score.replace(u"\u2013", "-")
+                score = score.replace(u"\u2014", "-")
                 score = int(score)
-                rating = soup.select("div.post_show")
+                #rating = soup.select("div.post_show")
+                author = soup.select("div.author > a")[0].get_text()
+                print author
                 stories.append({'url': url, 'title': title, 'text': text,
-                                'score': score})
+                                'score': score, 'author': author})
             except:
                 print "Some errors occured... ", sys.exc_info()[0] 
+                print score
                 continue
         json.dump(stories, f)
 
