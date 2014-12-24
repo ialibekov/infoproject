@@ -12,10 +12,9 @@ class SpellChecker(object):
 		path_dic = pwd + '/spell/ru_RU.dic'
 		path_aff = pwd + '/spell/ru_RU.aff'
 		if os.path.exists(path_dic) and os.path.exists(path_aff):
-			print "Spell: have"
 			self.checker = hunspell.HunSpell(path_dic, path_aff)
 		else:
-			print "Spell: do nothing"
+			pass
 
 	def spell(self, word):
 		if self.checker is None:
