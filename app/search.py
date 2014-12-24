@@ -6,7 +6,6 @@ from pymystem3 import Mystem
 from spell.spell import SpellChecker
 import re
 from math import log10
-from nltk.tokenize import word_tokenize
 import mongoengine
 import sys
 
@@ -172,8 +171,8 @@ class Search(object):
                         result[doc] = result.setdefault(doc, 0) + rd.rank
                 except mongoengine.errors.DoesNotExist:
                     continue
-        sorted_result = sorted(result.items(), key=lambda tup: tup[1], reverse=True)[:100]
-        return [(doc.url, doc.title, self.snippet(doc.text, query)) for doc, rank in sorted_result]
+        sorted_result = sorted(result.items(), key=lambda tup: tup[1], reverse=True)[:20]
+        return [(doc.url, doc.title, self.snippet(doc.text, query), doc.score) for doc, rank in sorted_result]
         #return [(doc.url, doc.title) for doc, rank in sorted_result]
 
     def generate_suggest(self, query):

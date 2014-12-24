@@ -52,3 +52,10 @@ body {
 	padding-top: 10px;
 	position: absolute;
 }
+
+div.results {
+	border-style: solid;
+	border-color: #eeeeee;
+	border-width: 0px;
+	padding: 5px;
+}
